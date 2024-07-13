@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Fonte Hydra V1.0</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinha o conteúdo ao topo */
+            height: 100vh;
+            margin: 0;
+            overflow-y: auto; /* Adiciona scroll vertical se necessário */
+        }
+
+        input[type="number"][name="fileSizes[]"] {
+            width: calc(70% - 10px); /* Ajuste o valor de width conforme necessário */
+        }
+
+        select[name="fileSizeUnit"] {
+            width: calc(29% - 10px); /* Ajuste o valor de width conforme necessário */
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px; /* Espaço acima do container */
+            margin-bottom: 20px; /* Espaço abaixo do container */
+        }
+
+        .download-group {
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="datetime-local"],
+        select {
+            width: calc(100% - 10px);
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .file-size-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-size-input input[type="text"] {
+            flex: 1; /* Ocupa todo o espaço disponível */
+            margin-right: 10px; /* Espaçamento entre o input e o select */
+        }
+
+        .file-size-input select {
+            flex: 1; /* Ocupa todo o espaço disponível */
+            max-width: 30%; /* Largura máxima para o select */
+        }
+
+        .add-download-button,
+        .generate-json-button,
+        .download-json-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px; /* Adicionado espaço acima do botão */
+            margin-right: 10px; /* Espaço à direita entre os botões */
+        }
+
+        .add-download-button:hover,
+        .generate-json-button:hover,
+        .download-json-button:hover {
+            background-color: #45a049;
+        }
+
+        .download-json-button {
+            background-color: #007BFF; /* Cor azul para o botão de download */
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px; /* Adicionado espaço acima do botão */
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <center><h2>Criar Fonte Hydra V1.0</h2></center><br>
+    <form id="jsonForm">
+        <label for="nome">Nome da Fonte:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <div id="downloadsContainer">
+            <div class="download-group" id="firstDownloadGroup">
+            
+                <label for="titles">Título:</label>
+                <input type="text" name="titles[]" required>
+
+                <label for="magnet">Magnet:</label>
+                <input type="url" name="uris[]" required>
+
+                <label for="uploadDate">Data de Upload:</label>
+                <input type="datetime-local" name="uploadDates[]" required>
+
+                <label for="fileSize">Tamanho:</label>
+                <input type="number" name="fileSizes[]" required pattern="[0-9]+(\.[0-9]+)?" title="Digite um número válido (ex: 300 ou 300.5)">
+                <select name="fileSizeUnit">
+                    <option value="GB">GB</option>
+                    <option value="MB">MB</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="button" class="add-download-button" onclick="addDownload()">+ Adicionar Download</button>
+        <button type="button" class="generate-json-button" onclick="generateJSON()">Gerar Fonte JSON</button>
+        <a id="downloadJsonButton" class="download-json-button" style="display: none;">Download JSON</a>
+    </form>
+
+    <div id="jsonResult" style="display: none;">
+        <h3>JSON Gerado:</h3>
+        <pre id="jsonOutput"></pre>
+    </div>
+</div>
+
+<script>
+    // Função para obter a data e hora atuais no formato para input datetime-local
+    function getCurrentDateTime() {
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = (now.getMonth() + 1).toString().padStart(2, '0');
+        var day = now.getDate().toString().padStart(2, '0');
+        var hour = now.getHours().toString().padStart(2, '0');
+        var minute = now.getMinutes().toString().padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    function addDownload() {
+        var downloadsContainer = document.getElementById('downloadsContainer');
+        var newDownloadGroup = document.createElement('div');
+        newDownloadGroup.className = 'download-group';
+        newDownloadGroup.innerHTML = `
+            <hr>
+            <label for="titles">Título:</label>
+            <input type="text" name="titles[]" required>
+
+            <label for="magnet">Magnet:</label>
+            <input type="url" name="uris[]" required>
+
+            <label for="uploadDate">Data de Upload:</label>
+            <input type="datetime-local" name="uploadDates[]" value="${getCurrentDateTime()}" required>
+
+            <label for="fileSize">Tamanho:</label>
+            <input type="number" name="fileSizes[]" required pattern="[0-9]+(\.[0-9]+)?" title="Digite um número válido (ex: 300 ou 300.5)">
+            <select name="fileSizeUnit">
+                <option value="GB">GB</option>
+                <option value="MB">MB</option>
+            </select>
+        `;
+        downloadsContainer.appendChild(newDownloadGroup);
+        newDownloadGroup.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    function generateJSON() {
+        var form = document.getElementById('jsonForm');
+        var formData = new FormData(form);
+        var json = {
+            "name": formData.get('nome'),
+            "downloads": []
+        };
+
+        var downloadGroups = document.querySelectorAll('.download-group');
+        downloadGroups.forEach(function(group) {
+            var fileSize = group.querySelector('input[name="fileSizes[]"]').value;
+            var fileSizeUnit = group.querySelector('select[name="fileSizeUnit"]').value;
+            var download = {
+                "title": group.querySelector('input[name="titles[]"]').value,
+                "uris": [group.querySelector('input[name="uris[]"]').value],
+                "uploadDate": group.querySelector('input[name="uploadDates[]"]').value,
+                "fileSize": fileSize + ' ' + fileSizeUnit // Combinando tamanho e unidade
+            };
+            json.downloads.push(download);
+        });
+
+        var jsonString = JSON.stringify(json, null, 4);
+        document.getElementById('jsonOutput').textContent = jsonString;
+        document.getElementById('jsonResult').style.display = 'block';
+        document.getElementById('downloadJsonButton').style.display = 'inline-block'; // Mostrar o botão de download após gerar o JSON
+        document.getElementById('downloadJsonButton').setAttribute('download', 'source.json'); // Nome do arquivo para download
+        document.getElementById('downloadJsonButton').setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonString)); // URL do arquivo para download
+    }
+
+    // Definir valor inicial para o primeiro campo de data de upload ao carregar a página
+    window.onload = function() {
+        var firstUploadDate = document.querySelector('#firstDownloadGroup input[name="uploadDates[]"]');
+        firstUploadDate.value = getCurrentDateTime();
+    };
+</script>
+</body>
+</html>
