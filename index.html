@@ -151,9 +151,9 @@
             </div>
         </div>
 
-        <button type="button" class="add-download-button" onclick="addDownload()">+ Adicionar Download</button>
-        <button type="button" class="generate-json-button" onclick="generateJSON()">Gerar Fonte JSON</button>
-        <a id="downloadJsonButton" class="download-json-button" style="display: none;">Download JSON</a>
+        <button type="button" class="add-download-button" onclick="addDownload()">+ Adicionar Jogo</button>
+        <button type="button" class="generate-json-button" onclick="generateJSON()">Gerar Fonte</button>
+        <a id="downloadJsonButton" class="download-json-button" style="display: none;">Download da Fonte</a>
     </form>
 
     <div id="jsonResult" style="display: none;">
@@ -225,7 +225,7 @@
         document.getElementById('jsonOutput').textContent = jsonString;
         document.getElementById('jsonResult').style.display = 'block';
         document.getElementById('downloadJsonButton').style.display = 'inline-block'; // Mostrar o botão de download após gerar o JSON
-        document.getElementById('downloadJsonButton').setAttribute('download', 'source.json'); // Nome do arquivo para download
+        document.getElementById('downloadJsonButton').setAttribute('download', 'fonte.json'); // Nome do arquivo para download
         document.getElementById('downloadJsonButton').setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonString)); // URL do arquivo para download
     }
 
